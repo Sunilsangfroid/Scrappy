@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scrappy/utils/getLocation.dart';
 import '../pages/home.dart';
 
 class Splash extends StatefulWidget {
@@ -36,7 +37,7 @@ class _SplashState extends State<Splash> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.asset(
-                    'lib/icons/icon.png',
+                    'lib/assets/logo.png',
                     width: 80,
                     height: 80,
                   ),
