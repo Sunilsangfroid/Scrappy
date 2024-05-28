@@ -32,15 +32,17 @@ class LocationHelper {
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks.first;
       address = '${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}';
+      log("Address: $address");
+      if (isWithinDelhiNCR(place)) {
+        return address;
+      } else {
+        return "Sorry! We are currently unavailable at your location";
+      }
     } else {
       log("No address found");
       address = await getGoogleAddress(currentPosition.latitude, currentPosition.longitude);
-    }
-
-    if (isWithinDelhiNCR(currentPosition.latitude, currentPosition.longitude)) {
+      log("Google Address: $address");
       return address;
-    } else {
-      return "Sorry! We are currently unavailable at your location";
     }
   }
 
@@ -56,14 +58,12 @@ class LocationHelper {
     return 'No address found';
   }
 
-  static bool isWithinDelhiNCR(double lat, double lng) {
-    // Example boundaries for Delhi NCR (not precise)
-    const double northLat = 29.0;
-    const double southLat = 27.0;
-    const double eastLng = 77.5;
-    const double westLng = 75.5;
+  static bool isWithinDelhiNCR(Placemark place) {
+    final List<String> validCities = ['Gurugram','Kairana', 'Noida', 'Greater Noida', 'Faridabad'];
+    final String? state = place.administrativeArea;
+    final String? city = place.locality;
 
-    if (lat <= northLat && lat >= southLat && lng <= eastLng && lng >= westLng) {
+    if (state == 'Delhi' || validCities.contains(city)) {
       return true;
     } else {
       return false;

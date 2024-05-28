@@ -1,79 +1,115 @@
-import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:scrappy/pages/serviceSelector.dart';
 
 class CSCPickerScreen extends StatefulWidget {
-  const CSCPickerScreen({Key? key}) : super(key: key);
+  const CSCPickerScreen({super.key});
 
   @override
   State<CSCPickerScreen> createState() => _CSCPickerScreenState();
 }
 
 class _CSCPickerScreenState extends State<CSCPickerScreen> {
-  String? countryValue;
-  String? stateValue;
-  String? cityValue;
+  String? selectedCountry;
+  String? selectedState;
+  String? selectedCity;
 
-  final List<String> validStates = ['Delhi'];
-  final List<String> validCities = ['Gurugram', 'Noida', 'Greater Noida', 'Faridabad'];
-
-  void _confirmLocation() {
-    if ((stateValue != null && validStates.contains(stateValue)) ||
-        (cityValue != null && validCities.contains(cityValue))) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SelectService()),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Unavailable Location'),
-          content: const Text('Sorry! We are currently unavailable at your location.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
+  // Dummy data for countries, states, and cities
+  final List<String> countries = ['India'];
+  final Map<String, List<String>> states = {
+    'India': ['Delhi', 'Haryana', 'Uttar Pradesh'],
+  };
+  final Map<String, List<String>> cities = {
+    'Delhi': ['Delhi'],
+    'Haryana': ['Gurugram', 'Faridabad'],
+    'Uttar Pradesh': ['Noida', 'Greater Noida'],
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select your location"),
+        title: const Text('Select Location'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CSCPicker(
-              defaultCountry: CscCountry.India,
-              onCountryChanged: (country) {
+            DropdownButton<String>(
+              value: selectedCountry,
+              hint: const Text('Select Country'),
+              items: countries.map((String country) {
+                return DropdownMenuItem<String>(
+                  value: country,
+                  child: Text(country),
+                );
+              }).toList(),
+              onChanged: (newValue) {
                 setState(() {
-                  countryValue = country;
-                });
-              },
-              onStateChanged: (state) {
-                setState(() {
-                  stateValue = state;
-                });
-              },
-              onCityChanged: (city) {
-                setState(() {
-                  cityValue = city;
+                  selectedCountry = newValue;
+                  selectedState = null;
+                  selectedCity = null;
                 });
               },
             ),
+            if (selectedCountry != null)
+              DropdownButton<String>(
+                value: selectedState,
+                hint: const Text('Select State'),
+                items: states[selectedCountry!]!.map((String state) {
+                  return DropdownMenuItem<String>(
+                    value: state,
+                    child: Text(state),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedState = newValue;
+                    selectedCity = null;
+                  });
+                },
+              ),
+            if (selectedState != null)
+              DropdownButton<String>(
+                value: selectedCity,
+                hint: const Text('Select City'),
+                items: cities[selectedState!]!.map((String city) {
+                  return DropdownMenuItem<String>(
+                    value: city,
+                    child: Text(city),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedCity = newValue;
+                  });
+                },
+              ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _confirmLocation,
-              child: const Text('Confirm Location'),
+              onPressed: () {
+                if (selectedCountry != null && selectedState != null && selectedCity != null) {
+                  Navigator.pop(context, {
+                    'country': selectedCountry!,
+                    'state': selectedState!,
+                    'city': selectedCity!,
+                  });
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Incomplete Selection'),
+                      content: const Text('Please select country, state, and city.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+              child: const Text('Confirm'),
             ),
           ],
         ),

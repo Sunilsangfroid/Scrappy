@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:scrappy/utils/locationHelper.dart';
+import 'package:scrappy/pages/buyer_page.dart';
+import 'package:scrappy/pages/seller_page.dart'; // Import buyerPage class
 
 class SelectService extends StatefulWidget {
-  const SelectService({super.key});
+  const SelectService({Key, key}) : super(key: key);
 
   @override
   State<SelectService> createState() => _SelectServiceState();
@@ -10,21 +11,7 @@ class SelectService extends StatefulWidget {
 
 class _SelectServiceState extends State<SelectService> {
   Future<void> getCurrentLocation() async {
-    String address = await LocationHelper.getCurrentLocation();
-    // Handle the address as needed, e.g., display in a dialog or update a state
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Current Location'),
-        content: Text(address),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    // Your existing code for getting current location
   }
 
   @override
@@ -38,22 +25,32 @@ class _SelectServiceState extends State<SelectService> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: getCurrentLocation,
-              child: const Text("Select Location"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // Background color
-                foregroundColor: Colors.white, // Text color
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Padding
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ), // Text style
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rounded corners
+
+             // Add some space between buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to buyer page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BuyerPage()), // Use BuyerPage class here
+                    );
+                  },
+                  child: Text("Buyer"),
                 ),
-                elevation: 5, // Elevation
-              ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigate to buyer page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SellerPage()), // Use BuyerPage class here
+                    );
+                  },
+                  child: Text("Seller"),
+                ),
+              ],
             ),
           ],
         ),

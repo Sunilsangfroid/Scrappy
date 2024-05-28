@@ -1,9 +1,9 @@
-// home_page.dart
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scrappy/utils/locationHelper.dart'; // Import the helper
 import 'package:scrappy/utils/CSCPicker.dart'; // Import the CSCPicker screen
+import 'serviceSelector.dart'; // Import the SelectService page
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,24 +17,31 @@ class _HomePageState extends State<HomePage> {
   final double horizontalPadding = 40;
   final double verticalPadding = 25;
   String? selectedLocation;
+  bool isLocationValid = false;
 
   // Method to handle location fetching
   Future<void> getCurrentLocation() async {
     String address = await LocationHelper.getCurrentLocation();
-    // Handle the address as needed, e.g., display in a dialog or update a state
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Current Location'),
-        content: Text(address),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    if (address.contains("Sorry! We are currently unavailable at your location")) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Current Location'),
+          content: Text(address),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      setState(() {
+        selectedLocation = address;
+        isLocationValid = true;
+      });
+    }
   }
 
   // Method to navigate to CSCPicker screen and get the result
@@ -45,9 +52,31 @@ class _HomePageState extends State<HomePage> {
     );
 
     if (result != null && result is Map<String, String>) {
-      setState(() {
-        selectedLocation = "${result['city']}, ${result['state']}, ${result['country']}";
-      });
+      String? state = result['state'];
+      String? city = result['city'];
+      if (state == 'Delhi' || ['Gurugram', 'Noida', 'Greater Noida', 'Faridabad'].contains(city)) {
+        setState(() {
+          selectedLocation = "$city, $state, ${result['country']}";
+          isLocationValid = true;
+        });
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Unavailable Location'),
+            content: const Text('Sorry! We are currently unavailable at your location.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        setState(() {
+          isLocationValid = false;
+        });
+      }
     }
   }
 
@@ -165,6 +194,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    if (!isLocationValid)
                     Center(
                       child: ElevatedButton(
                         onPressed: getCurrentLocation,
@@ -185,6 +215,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    if (!isLocationValid)
                     Center(
                       child: ElevatedButton(
                         onPressed: selectLocation,
@@ -213,6 +244,34 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.white,
                         ),
                         textAlign: TextAlign.center,
+                      ),
+                    const SizedBox(height: 20),
+                    if (isLocationValid)
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SelectService(),
+                              ),
+                            );
+                          },
+                          child: const Text("Select Your Service"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red, // Background color
+                            foregroundColor: Colors.white, // Text color
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Padding
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ), // Text style
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10), // Rounded corners
+                            ),
+                            elevation: 5, // Elevation
+                          ),
+                        ),
                       ),
                   ],
                 ),
