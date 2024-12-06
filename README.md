@@ -1,6 +1,6 @@
 # scrappy
 
-A new Flutter project.
+A new Flutter project for recycling trading of newspaper.
 
 ## Getting Started
 
